@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Request a Call</title>
+
+  <style>
+    :root{
+      --bg: #0b1220;
+      --card: rgba(255,255,255,.08);
+      --card2: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.72);
+      --border: rgba(255,255,255,.14);
+      --shadow: 0 18px 45px rgba(0,0,0,.35);
+      --accent: #ff7a00;  /* Coding2u-ish orange */
+      --accent2: #2a5cff; /* Coding2u-ish blue */
+      --danger: #ff4d4d;
+      --ok: #2ee59d;
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px 16px;
+      background:
+        radial-gradient(1200px 700px at 15% 20%, rgba(42,92,255,.25), transparent 60%),
+        radial-gradient(900px 600px at 85% 75%, rgba(255,122,0,.25), transparent 55%),
+        linear-gradient(180deg, #070c16 0%, #0b1220 100%);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+    }
+
+    .wrap { width: 100%; max-width: 520px; position: relative; }
+
+    .hero {
+      padding: 18px 10px 26px;
+      text-align: left;
+    }
+    .brand {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: .2px;
+    }
+    .dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 0 6px rgba(255,122,0,.12);
+    }
+    h1 {
+      margin: 10px 0 8px;
+      font-size: 28px;
+      line-height: 1.15;
+    }
+    .sub {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 46ch;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* glass highlight */
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      background: radial-gradient(700px 240px at 20% 0%, rgba(255,255,255,.14), transparent 60%);
+      pointer-events:none;
+    }
+
+    form {
+      position: relative;
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .row { display: grid; gap: 8px; }
+    .grid2 { display: grid; gap: 12px; grid-template-columns: 1fr; }
+    @media (min-width: 540px){
+      .grid2 { grid-template-columns: 1fr 1fr; }
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+    }
+    .hint {
+      color: rgba(255,255,255,.55);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      outline: none;
+      font-size: 14px;
+      transition: border-color .15s ease, box-shadow .15s ease, transform .05s ease;
+    }
+    input:focus, textarea:focus {
+      border-color: rgba(255,122,0,.55);
+      box-shadow: 0 0 0 4px rgba(255,122,0,.14);
+    }
+    textarea { resize: vertical; min-height: 108px; }
+
+    .status {
+      display: none;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.22);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .status.show { display: block; }
+    .status.ok { border-color: rgba(46,229,157,.45); }
+    .status.err { border-color: rgba(255,77,77,.55); }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #0b1220;
+      background: linear-gradient(135deg, var(--accent), #ff9a3c);
+      box-shadow: 0 10px 22px rgba(255,122,0,.20);
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      transition: transform .08s ease, filter .15s ease, opacity .15s ease;
+    }
+    button:hover { filter: brightness(1.03); }
+    button:active { transform: translateY(1px); }
+    button:disabled { opacity: .65; cursor: not-allowed; }
+
+    .secondary {
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow: none;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid rgba(11,18,32,.25);
+      border-top-color: rgba(11,18,32,.95);
+      display: none;
+      animation: spin .85s linear infinite;
+    }
+    .loading .spinner { display: inline-block; }
+    .loading .btn-text { opacity: .95; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .footer {
+      padding: 12px 18px 18px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.55);
+      font-size: 12px;
+      line-height: 1.45;
+      position: relative;
+    }
+
+    .smalllink {
+      color: rgba(255,255,255,.72);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(255,255,255,.28);
+    }
+    .smalllink:hover { color: rgba(255,255,255,.9); }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div class="brand"><span class="dot"></span> Coding2u Lead Call Bridge</div>
+      <h1>Request a call back</h1>
+      <p class="sub">
+        Submit your details and we’ll connect you to our team. If we pick up, you’ll get called immediately and bridged into a live conference.
+      </p>
+    </div>
+
+    <div class="card">
+      <!-- ✅ Replace this with your Twilio Function /lead URL -->
+      <!-- Example: https://your-service-1234.twil.io/lead -->
+      <form id="leadForm" action="https://YOUR_BASE_URL/lead" method="POST" novalidate>
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+
+        <div class="grid2">
+          <div class="row">
+            <label for="customer_name">Full name</label>
+            <input id="customer_name" name="customer_name" type="text" autocomplete="name" required />
+          </div>
+
+          <div class="row">
+            <label for="customer_email">Email <span class="hint">(optional)</span></label>
+            <input id="customer_email" name="customer_email" type="email" autocomplete="email" />
+          </div>
+        </div>
+
+        <div class="row">
+          <label for="customer_phone">Phone number <span class="hint">(E.164 recommended)</span></label>
+          <input
+            id="customer_phone"
+            name="customer_phone"
+            type="tel"
+            inputmode="tel"
+            autocomplete="tel"
+            placeholder="+16045551234"
+            required
+          />
+        </div>
+
+        <div class="row">
+          <label for="message">Message <span class="hint">(optional)</span></label>
+          <textarea id="message" name="message" placeholder="Tell us what you need…"></textarea>
+        </div>
+
+        <div class="actions">
+          <button id="submitBtn" type="submit">
+            <span class="spinner" aria-hidden="true"></span>
+            <span class="btn-text">Request Call</span>
+          </button>
+
+          <button id="resetBtn" type="button" class="secondary">Reset</button>
+        </div>
+      </form>
+
+      <div class="footer">
+        Tip: Use <strong>+countrycode</strong> format (example: <code>+16045551234</code>). If you enter a 10-digit number, we’ll assume Canada/US (+1).
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================
+    // CONFIG
+    // =========================
+    // If your form page is on a different domain than the Twilio Function, Twilio must allow CORS.
+    // In Twilio Functions, you can enable "CORS" in the function settings, or manually set headers.
+
+    const form = document.getElementById('leadForm');
+    const phoneInput = document.getElementById('customer_phone');
+    const statusBox = document.getElementById('status');
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // =========================
+    // UI helpers
+    // =========================
+    function setStatus(type, msg) {
+      statusBox.className = 'status show ' + (type === 'ok' ? 'ok' : type === 'err' ? 'err' : '');
+      statusBox.textContent = msg;
+    }
+
+    function clearStatus() {
+      statusBox.className = 'status';
+      statusBox.textContent = '';
+    }
+
+    function setLoading(isLoading) {
+      if (isLoading) {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('loading');
+        submitBtn.querySelector('.btn-text').textContent = 'Sending…';
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+        submitBtn.querySelector('.btn-text').textContent = 'Request Call';
+      }
+    }
+
+    // =========================
+    // Phone formatting / validation
+    // =========================
+    function toE164(raw) {
+      if (!raw) return null;
+
+      let v = raw.trim();
+
+      // Convert 00-prefix to +
+      if (v.startsWith('00')) v = '+' + v.slice(2);
+
+      // Keep +, remove other non-digits
+      const hasPlus = v.startsWith('+');
+      const digits = v.replace(/\D/g, '');
+
+      if (hasPlus) {
+        // + + digits
+        return '+' + digits;
+      }
+
+      // If user typed only digits:
+      // - 10 digits => assume +1 (Canada/US)
+      // - 11 digits starting with 1 => treat as +<digits>
+      if (digits.length === 10) return '+1' + digits;
+      if (digits.length === 11 && digits.startsWith('1')) return '+' + digits;
+
+      // Otherwise we can't safely infer country
+      return null;
+    }
+
+    function isLikelyE164(e164) {
+      // Basic E.164: + then 8-15 digits (real-world max is 15)
+      return /^\+\d{8,15}$/.test(e164);
+    }
+
+    // Auto-format on blur (and show the formatted value)
+    phoneInput.addEventListener('blur', () => {
+      const formatted = toE164(phoneInput.value);
+      if (formatted) phoneInput.value = formatted;
+    });
+
+    // =========================
+    // AJAX submit
+    // =========================
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearStatus();
+
+      // Basic HTML required checks
+      if (!form.checkValidity()) {
+        setStatus('err', 'Please fill the required fields.');
+        return;
+      }
+
+      // Phone normalize + validate
+      const formattedPhone = toE164(phoneInput.value);
+      if (!formattedPhone || !isLikelyE164(formattedPhone)) {
+        setStatus(
+          'err',
+          'Please enter a valid phone number. Use +countrycode (example: +16045551234). If you’re in Canada/US, a 10-digit number is OK.'
+        );
+        phoneInput.focus();
+        return;
+      }
+      phoneInput.value = formattedPhone;
+
+      // Build form payload (application/x-www-form-urlencoded)
+      const payload = new URLSearchParams(new FormData(form)).toString();
+
+      setLoading(true);
+
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+          },
+          body: payload
+        });
+
+        // Some Twilio Functions return text; some return JSON.
+        const text = await res.text();
+        let data = null;
+        try { data = JSON.parse(text); } catch (_) {}
+
+        if (!res.ok) {
+          setStatus('err', 'Something went wrong submitting your request. Please try again.');
+          console.error('HTTP error', res.status, text);
+          return;
+        }
+
+        // Success UI
+        setStatus('ok', '✅ Submitted! If we pick up, you’ll receive a call immediately and we’ll connect you.');
+        form.reset();
+      } catch (err) {
+        setStatus('err', 'Network error. Please check your connection and try again.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    // Reset button
+    resetBtn.addEventListener('click', () => {
+      form.reset();
+      clearStatus();
+      setLoading(false);
+      phoneInput.focus();
+    });
+  </script>
+</body>
+</html>
